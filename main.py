@@ -24,7 +24,7 @@ def generate_ai_script():
     try:
         print("[+] Generating viral script directly with Gemini API...")
         # Using 1.5-flash as it is the most stable endpoint for direct API calls
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
         payload = {
             "contents": [{
                 "parts": [{
