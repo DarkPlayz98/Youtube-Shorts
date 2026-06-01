@@ -25,7 +25,7 @@ if not YOUTUBE_SECRET_DATA and os.path.exists("client_secret.json"):
 def generate_ai_script():
     print("[+] Generating viral script with Gemini...")
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     prompt = """
     Write a highly engaging 40-second script for a YouTube Short about Stoic Philosophy or dark psychological facts. 
