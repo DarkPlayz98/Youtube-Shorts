@@ -3,7 +3,6 @@ import json
 import random
 import urllib.request
 import asyncio
-from google import genai
 import edge_tts
 from moviepy.editor import VideoFileClip, AudioFileClip
 from googleapiclient.discovery import build
@@ -21,22 +20,27 @@ if not YOUTUBE_TOKEN_DATA and os.path.exists("token.json"):
 if not YOUTUBE_SECRET_DATA and os.path.exists("client_secret.json"):
     with open("client_secret.json", "r") as f: YOUTUBE_SECRET_DATA = f.read()
 
-# 2. GENERATE SCRIPT WITH GEMINI AI
+# 2. GENERATE SCRIPT WITH GEMINI API (DIRECT HTTP CONNECTION)
 def generate_ai_script():
-    print("[+] Generating viral script with Gemini...")
-    client = genai.Client(api_key=GEMINI_API_KEY)
+    print("[+] Generating viral script directly with Gemini API...")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": "Write a highly engaging 40-second script for a YouTube Short about Stoic Philosophy or dark psychological facts. It must be structured like the channel 10X INCOME. Start with a massive hook, keep sentences short and punchy, and end with a call to action. Return ONLY the voiceover text. Do not include sound effects or visual notes."
+            }]
+        }]
+    }
     
-    prompt = """
-    Write a highly engaging 40-second script for a YouTube Short about Stoic Philosophy or dark psychological facts. 
-    It must be structured like the channel 10X INCOME. 
-    Start with a massive hook, keep sentences short and punchy, and end with a call to action. 
-    Return ONLY the voiceover text. Do not include sound effects or visual notes.
-    """
-    response = client.models.generate_content(
-        model='gemini-1.5-flash',
-        contents=prompt
+    req = urllib.request.Request(
+        url, 
+        data=json.dumps(payload).encode("utf-8"), 
+        headers={"Content-Type": "application/json"}
     )
-    return response.text.strip()
+    
+    with urllib.request.urlopen(req) as response:
+        res_data = json.loads(response.read().decode("utf-8"))
+        return res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
 
 # 3. GENERATE CINEMATIC AI VOICE
 async def generate_voice(text, output_audio):
