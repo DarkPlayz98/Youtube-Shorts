@@ -1,9 +1,10 @@
+cat > main.py << 'EOF'
 import os
 import json
 import random
 import urllib.request
 import asyncio
-import google.generativeai as genai
+from google import genai
 import edge_tts
 from moviepy.editor import VideoFileClip, AudioFileClip
 from googleapiclient.discovery import build
@@ -24,8 +25,7 @@ if not YOUTUBE_SECRET_DATA and os.path.exists("client_secret.json"):
 # 2. GENERATE SCRIPT WITH GEMINI AI
 def generate_ai_script():
     print("[+] Generating viral script with Gemini...")
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = """
     Write a highly engaging 40-second script for a YouTube Short about Stoic Philosophy or dark psychological facts. 
@@ -33,20 +33,21 @@ def generate_ai_script():
     Start with a massive hook, keep sentences short and punchy, and end with a call to action. 
     Return ONLY the voiceover text. Do not include sound effects or visual notes.
     """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-1.5-flash',
+        contents=prompt
+    )
     return response.text.strip()
 
 # 3. GENERATE CINEMATIC AI VOICE
 async def generate_voice(text, output_audio):
     print("[+] Generating cinematic AI voice...")
-    # Using a high-quality deep male voice (Christopher)
     communicate = edge_tts.Communicate(text, "en-US-ChristopherNeural")
     await communicate.save(output_audio)
 
 # 4. DOWNLOAD RANDOM BACKGROUND VIDEO
 def download_background():
     print("[+] Downloading background footage...")
-    # Direct links to clean vertical abstract/nature loop clips
     video_urls = [
         "https://assets.mixkit.co/videos/preview/mixkit-abstract-laser-lights-background-loop-41852-large.mp4",
         "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-numbers-41864-large.mp4",
@@ -61,10 +62,7 @@ def create_final_video():
     video_clip = VideoFileClip("background.mp4")
     audio_clip = AudioFileClip("voice.mp3")
     
-    # Trim background video to match audio length
     final_clip = video_clip.set_audio(audio_clip).set_duration(audio_clip.duration)
-    
-    # Ensure standard vertical shorts format (1080x1920)
     final_clip = final_clip.resize(newsize=(1080, 1920))
     final_clip.write_videofile("output.mp4", fps=24, codec="libx264", audio_codec="aac")
 
@@ -118,4 +116,5 @@ if __name__ == "__main__":
         upload_to_youtube()
     except Exception as e:
         print(f"[-] Automation critical error: {e}")
+EOF
 
