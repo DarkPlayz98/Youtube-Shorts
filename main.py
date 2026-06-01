@@ -1,4 +1,3 @@
-cat > main.py << 'EOF'
 import os
 import json
 import random
@@ -116,5 +115,4 @@ if __name__ == "__main__":
         upload_to_youtube()
     except Exception as e:
         print(f"[-] Automation critical error: {e}")
-EOF
 
